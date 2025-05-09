@@ -86,5 +86,40 @@ export const registerMedicamento = async(req,res) => {
 };
 
 export const updateMedicamento = async(req,res) => {
+try {
+ const id = req.params.id;
+ const {tipo,nombre,nomcomercial,presentacion,receta,precio} = req.body
 
+ const querySQL = 'call spUpdateMedicamento(?)';
+
+ const [results] = await pool.query(querySQL, [tipo,nombre,nomcomercial,presentacion,receta,precio,id])
+
+ if (results.affectedRows == 0){
+  return res.status(404).json({
+    message: ' el ID enviado NO existe'
+  })
+ }
+
+ res.sendStatus(200)
+} catch {
+  console.error("No se pudo concretar PUT")
+}
+};
+export const deleteMedicamento = async(req,res) => {
+  try {
+    const querySQL = 'call spDeleteMedicamento(?)'
+    const id = req.params.id
+
+    const [results] = await pool.query(querySQL, [id])
+
+    if (results.affectedRows == 0) {
+      return res.status(404).json({
+        message: "EL ID no existe"
+      })
+    }
+   res.send({message: 'Eliminado correctamente'})  
+  } catch (error) {
+    console.error("No se pudo concretar DELETE")
+  }
+}
 };
