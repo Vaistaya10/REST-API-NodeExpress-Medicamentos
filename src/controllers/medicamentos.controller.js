@@ -64,8 +64,15 @@ try {
 
 export const registerMedicamento = async(req,res) => {
   try {
-    const querySQL = 'call spRegisterMedicamento(?,?,?,?,?,?)'
     const {tipo,nombre,nomcomercial,presentacion,receta,precio} = req.body
+if (precio <= 0) {
+      return res.status(400).json({
+        status: false,
+        message: 'El precio debe ser mayor que cero'
+      });
+    }
+
+    const querySQL = 'call spRegisterMedicamento(?,?,?,?,?,?)'
     const [results] = await pool.query(querySQL, [tipo,nombre,nomcomercial,presentacion,receta,precio]);
 
     if (results.affectedRows = 0) {
@@ -90,36 +97,46 @@ try {
  const id = req.params.id;
  const {tipo,nombre,nomcomercial,presentacion,receta,precio} = req.body
 
- const querySQL = 'call spUpdateMedicamento(?)';
+    if (precio <= 0) {
+      return res.status(400).json({
+        message: 'El precio debe ser mayor que cero'
+      });
+    }
 
- const [results] = await pool.query(querySQL, [tipo,nombre,nomcomercial,presentacion,receta,precio,id])
+const querySQL = 'CALL spUpdateMedicamento(?,?,?,?,?,?,?)';
+const [results] = await pool.query(querySQL, [ id, tipo, nombre, nomcomercial, presentacion, receta, precio ]);
 
  if (results.affectedRows == 0){
   return res.status(404).json({
     message: ' el ID enviado NO existe'
   })
  }
-
+//
  res.sendStatus(200)
 } catch {
   console.error("No se pudo concretar PUT")
 }
 };
-export const deleteMedicamento = async(req,res) => {
+export const deleteMedicamento = async (req, res) => {
   try {
-    const querySQL = 'call spDeleteMedicamento(?)'
-    const id = req.params.id
-
-    const [results] = await pool.query(querySQL, [id])
-
-    if (results.affectedRows == 0) {
-      return res.status(404).json({
-        message: "EL ID no existe"
-      })
+    const id = req.params.id;
+    // Primero chequeamos si requiere receta
+    const [[{ receta }]] = await pool.query('SELECT receta FROM medicamentos WHERE id = ?', [id]);
+    if (!receta) {
+      return res.status(404).json({ message: 'El ID no existe' });
     }
-   res.send({message: 'Eliminado correctamente'})  
+    if (receta === 'S') {
+      return res.status(403).json({ message: 'No se puede eliminar un medicamento con receta' });
+    }
+
+    const [results] = await pool.query('CALL spDeleteMedicamento(?)', [id]);
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: 'El ID no existe' });
+    }
+    res.json({ message: 'Eliminado correctamente' });
   } catch (error) {
-    console.error("No se pudo concretar DELETE")
+    console.error(error);
+    res.status(500).json({ message: 'Error interno al eliminar medicamento' });
   }
-}
 };
+

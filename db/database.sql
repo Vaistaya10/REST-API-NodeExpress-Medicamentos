@@ -1,14 +1,15 @@
--- Active: 1746797497505@@127.0.0.1@3306@medicamentos
-create database medicamentos;
+-- Active: 1746842592259@@127.0.0.1@3306@medicamentos
+CREATE DATABASE medicamentos;
 
-create table medicamentos (
-  id		       int                                   primary key AUTO_INCREMENT,
-  tipo		     enum('oral','topica','inyectable')    not null ,
-  nombre     	 varchar(120)                          not null,
-  nomcomercial varchar(40)                           null ,
-  presentacion enum('solida','semisolida','liquida') not null,
-  receta  	   enum('S','N')                         not null default 'N',
-  precio	     decimal(7,2)                          not null
+USE medicamentos;
+CREATE TABLE medicamentos (
+  id		       INT                                   PRIMARY KEY AUTO_INCREMENT,
+  tipo		     ENUM('oral','topica','inyectable')    NOT NULL ,
+  nombre     	 VARCHAR(120)                          NOT NULL,
+  nomcomercial VARCHAR(40)                           NULL ,
+  presentacion ENUM('solida','semisolida','liquida') NOT NULL,
+  receta  	   ENUM('S','N')                         NOT NULL DEFAULT 'N',
+  precio	     DECIMAL(7,2)                          NOT NULL
 ) ENGINE = INNODB;
 
 
@@ -26,67 +27,66 @@ INSERT INTO medicamentos (tipo, nombre, nomcomercial, presentacion, receta, prec
 ('oral', 'Omeprazol 20mg', 'Losec', 'solida', 'N', 33.20),
 ('inyectable', 'Ketorolaco Trometamina 30mg/ml', 'Toradol', 'liquida', 'S', 85.75);
 
-create view vwMedicamentos as
-select * from medicamentos;
+CREATE VIEW vwMedicamentos AS
+SELECT * FROM medicamentos;
 
-select * from vwmedicamentos;
-create procedure spGetMedicamentoById(
-  in _id INT
+-- select * from vwmedicamentos;
+DELIMITER $$
+CREATE PROCEDURE spGetMedicamentoById(
+  IN _id INT
 )
-begin
-  select * from medicamentos where id = _id;
-end;
+BEGIN
+  SELECT * FROM medicamentos WHERE id = _id;
+END $$
 
-create procedure spGetMedicamentosByReceta(
-  in _receta ENUM('S','N')
+DELIMITER $$
+CREATE PROCEDURE spGetMedicamentosByReceta(
+  IN _receta ENUM('S','N')
 )
-begin
-  select * from medicamentos where receta = _receta;
-end;
+BEGIN
+  SELECT * FROM medicamentos WHERE receta = _receta;
+END$$
 
-create procedure spGetMedicamentosByTipo(
-  in _tipo ENUM('oral','topica','inyectable')
+DELIMITER $$
+CREATE PROCEDURE spGetMedicamentosByTipo(
+  IN _tipo ENUM('oral','topica','inyectable')
 )
-begin
-  select * from medicamentos where tipo = _tipo;
-end;
+BEGIN
+  SELECT * FROM medicamentos WHERE tipo = _tipo;
+END $$
 
-create Procedure spRegisterMedicamento(
-  in _tipo ENUM('oral','topica','inyectable'),
-  in _nombre VARCHAR(120),
-  in _nomcomercial VARCHAR(40),
-  in _presentacion ENUM('solida','semisolida','liquida'),
-  in _receta ENUM('S','N'),
-  in _precio DECIMAL(7,2)
+DELIMITER $$
+CREATE PROCEDURE spRegisterMedicamento(
+  IN _tipo ENUM('oral','topica','inyectable'),
+  IN _nombre VARCHAR(120),
+  IN _nomcomercial VARCHAR(40),
+  IN _presentacion ENUM('solida','semisolida','liquida'),
+  IN _receta ENUM('S','N'),
+  IN _precio DECIMAL(7,2)
 )
-begin
-  insert into medicamentos (tipo, nombre, nomcomercial, presentacion, receta, precio)
-  values (_tipo, _nombre, nullif(_nomcomercial,''), _presentacion, _receta, _precio);
-end;
+BEGIN
+  INSERT INTO medicamentos (tipo, nombre, nomcomercial, presentacion, receta, precio)
+  VALUES (_tipo, _nombre, NULLIF(_nomcomercial,''), _presentacion, _receta, _precio);
+END $$
 
-create procedure spUpdateMedicamento(
-  in _id INT,
-  in _tipo ENUM('oral','topica','inyectable'),
-  in _nombre VARCHAR(120),
-  in _nomcomercial VARCHAR(40),
-  in _presentacion ENUM('solida','semisolida','liquida'),
-  in _receta ENUM('S','N'),
-  in _precio DECIMAL(7,2)
+DELIMITER $$
+CREATE PROCEDURE spUpdateMedicamento(
+  IN _id INT,
+  IN _tipo ENUM('oral','topica','inyectable'),
+  IN _nombre VARCHAR(120),
+  IN _nomcomercial VARCHAR(40),
+  IN _presentacion ENUM('solida','semisolida','liquida'),
+  IN _receta ENUM('S','N'),
+  IN _precio DECIMAL(7,2)
 )
-begin
-  update medicamentos
-  set tipo = _tipo,
+BEGIN
+  UPDATE medicamentos
+  SET tipo = _tipo,
       nombre = _nombre,
       nomcomercial = _nomcomercial,
       presentacion = _presentacion,
       receta = _receta,
       precio = _precio
-  where id = _id;
-end;
+  WHERE id = _id;
+END $$
 
-create procedure spDeleteMedicamento(
-  in _id INT
-)
-begin
-  delete from medicamentos where id = _id;
-end;

@@ -3,7 +3,9 @@ import {getMedicamentos,
   getMedicamentoById,
   getMedicamentosByReceta,
   getMedicamentosBytipo,
-  registerMedicamento
+  registerMedicamento,
+  updateMedicamento,
+  deleteMedicamento
  } from '../controllers/medicamentos.controller.js';
 
 const router = Router();
@@ -15,9 +17,9 @@ router.get('/medicamentos/tipo/:tipo', getMedicamentosBytipo);
 
 router.post('/medicamentos/', registerMedicamento);
 
-//router.put('/medicamentos/:id', updateMedicamento);
+router.put('/medicamentos/:id', updateMedicamento);
 
-//router.delete('/medicamentos/:id', deleteMedicamento);
+router.delete('/medicamentos/:id', deleteMedicamento);
 
 export default router;
 
